@@ -16,7 +16,8 @@ class ShortURLSerializer(serializers.ModelSerializer) :
             'id',
             'short_code' , 
             'click_count' ,
-            'created_at'
+            'created_at',
+            'expires_at'
         ]
 
     
