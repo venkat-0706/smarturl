@@ -12,33 +12,39 @@ from .models import ShortURL
 from .serializers  import ShortURLSerializer 
 from .utils import generate_short_code 
 
-class CreateShortURLView(APIView) : 
-    def post(self, request)  : 
-        serializer = ShortURLSerializer(data = request.data)
-        if not serializer.is_valid(): 
-            return Response(serializer.errors , status = status.HTTP_400_BAD_REQUEST)
-        short_code  = generate_short_code()
+class CreateShortURLView(APIView):
+    permission_classes = [AllowAny]
 
-        while ShortURL.objects.filter(short_code = short_code).exists() : 
+    def post(self, request):
+        serializer = ShortURLSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        short_code = generate_short_code()
+
+        while ShortURL.objects.filter(short_code=short_code).exists():
             short_code = generate_short_code()
 
-        expires_at = timezone.now() + timedelta(hours = 24)
+        expires_at = timezone.now() + timedelta(hours=24)
 
-        url = serializer.save(short_code = short_code ,expires_at = expires_at)
-
+        url = serializer.save(
+            short_code=short_code,
+            expires_at=expires_at
+        )
 
         return Response({
-            "id" : url.id , 
-            "original_url" : url.original_url , 
-            "short_code" :  url.short_code , 
-            'short_url'  : (f'http://127.0.0.1:8000/'
-                            f'{url.short_code}/'
+            "id": url.id,
+            "original_url": url.original_url,
+            "short_code": url.short_code,
+            "short_url": request.build_absolute_uri(
+                f'/{url.short_code}/'
             ),
-            "expires_at" : url.expires_at,
-            
-        },
-        status = status.HTTP_201_CREATED)
-
+            "expires_at": url.expires_at,
+        }, status=status.HTTP_201_CREATED)
 
 class RedirectURLView(APIView) : 
     def get(self, request , short_code)  :
