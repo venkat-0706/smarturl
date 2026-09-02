@@ -15,13 +15,41 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path , include 
-from myapp import urls 
+from django.urls import path, include
+
 from myapp.views import RedirectURLView
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
+
+    # Application APIs
     path('api/', include('myapp.urls')),
-    path('<str:short_code>/',RedirectURLView.as_view(), name = 'redirect-url'), 
+
+    # Short URL redirect
+    path(
+        '<str:short_code>/',
+        RedirectURLView.as_view(),
+        name='redirect-url'
+    ),
+
+    # JWT Authentication
+    path(
+        'api/auth/login/',
+        TokenObtainPairView.as_view(),
+        name='token_obtain_pair'
+    ),
+
+    path(
+        'api/auth/refresh/',
+        TokenRefreshView.as_view(),
+        name='token_refresh'
+    ),
+
 ]

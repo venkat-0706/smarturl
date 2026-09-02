@@ -4,6 +4,8 @@ from rest_framework.response import  Response
 from rest_framework import status 
 from django.utils import timezone 
 from datetime import timedelta
+from rest_framework.permissions import AllowAny
+from myapp.serializers import RegisterSerializer
 
 
 from .models import ShortURL 
@@ -70,7 +72,18 @@ class URLDetailedView(APIView) :
             "message" : "ShortURL deleted successfully"
         } , status = status.HTTP_204_NO_CONTENT)
     
-
+class RegisterView(APIView) :
+    permission_classes = [AllowAny] 
+    def post(self, request) : 
+        serializer = RegisterSerializer(data = request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message"  : "User Registered Successfully...",
+                "username" :  user.username
+            }, status = status.HTTP_201_CREATED)
+        return Response(serializer.errors , status = status.HTTP_400_BAD_REQUEST)
+    
 
 
 
